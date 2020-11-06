@@ -241,7 +241,6 @@ void decodeString(char* fileName)
 			{
 				fread(&code, sizeof(int), 1, file);
 				codeIndex = 0;
-				if (feof(file)) break;
 			}
 		}
 		else if (((code >> codeIndex) & 1) && cursor->right != NULL)
@@ -253,7 +252,6 @@ void decodeString(char* fileName)
 			{
 				fread(&code, sizeof(int), 1, file);
 				codeIndex = 0;
-				if (feof(file)) break;
 			}
 		}
 		else if (!((code >> codeIndex) & 1) && cursor->left == NULL)
