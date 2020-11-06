@@ -16,17 +16,15 @@ typedef struct Node
 void _countSymbols(char* string, int table[256], int* tableSize)
 {
 	// Count symbols
+	*tableSize = 0;
 	for (int i = 0; i < strlen(string); i++)
 	{
 		unsigned char charCode = (unsigned char)string[i];
+		if (table[charCode] == 0)
+		{
+			(*tableSize)++;
+		}
 		table[charCode]++;
-	}
-
-	// Count used symbols
-	*tableSize = 0;
-	for (int i = 0; i < 256; i++)
-	{
-		if (table[i] != 0) (*tableSize)++;
 	}
 }
 
@@ -213,6 +211,12 @@ void encodeString(char* string, char* fileName)
 		fwrite(&code, sizeof(int), 1, file);
 	}
 	fclose(file);
+
+	for (int i = 0; i < tableSize; i++)
+	{
+		free(forest[i]);
+	}
+	free(forest);
 }
 
 void decodeString(char* fileName)
@@ -270,4 +274,5 @@ void decodeString(char* fileName)
 		}
 	}
 	fclose(file);
+	free(tree);
 }
