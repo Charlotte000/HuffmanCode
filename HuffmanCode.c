@@ -111,7 +111,6 @@ Node* _buildTree(Node** forest, int forestSize)
 
 void _savePartTree(Node* tree, FILE* file)
 {
-	char output[100] = "";
 	if (tree->left != NULL)
 	{
 		_savePartTree(tree->left, file);
@@ -128,8 +127,13 @@ void _savePartTree(Node* tree, FILE* file)
 
 void _saveTree(Node* tree, FILE* file, int stringLength)
 {
+	// Recursively save tree values
 	_savePartTree(tree, file);
+
+	// End of tree data
 	fprintf(file, "|-1\n");
+
+	// Length of the encoded string
 	fprintf(file, "%d", stringLength);
 }
 
@@ -139,8 +143,8 @@ Node* _loadTree(FILE* file)
 	int tableSize = 0;
 	while (true)
 	{
-		char symbol;
-		int freq;
+		char symbol = ' ';
+		int freq = 0;
 		fscanf(file, "%c%d%*c", &symbol, &freq);
 		if (feof(file) || (symbol == '|' && freq == -1))
 		{
@@ -157,21 +161,27 @@ Node* _loadTree(FILE* file)
 
 void encodeString(char* string, char* fileName)
 {
+	// Calculate frequencies
 	int tableSize = 0;
 	int table[256] = { 0 };
 	_countSymbols(string, table, &tableSize);
 
+	// Build tree
 	Node** forest = _createForest(table, tableSize);
 	Node* tree = _buildTree(forest, tableSize);
 
+	// Saving tree to the file
 	FILE* file = fopen(fileName, "w+b");
 	_saveTree(tree, file, strlen(string));
+
+	// Encode the string
 	int code = 0;
 	int codeIndex = 0;
 	for (int i = 0; i < strlen(string); i++)
 	{
 		Node* cursor = tree;
-
+		
+		// Get the path of the character
 		while (true)
 		{
 			if (cursor->left != NULL && strchr(cursor->left->symbol, string[i]) != NULL)
@@ -210,8 +220,10 @@ void encodeString(char* string, char* fileName)
 	{
 		fwrite(&code, sizeof(int), 1, file);
 	}
+
 	fclose(file);
 
+	// Cleaning
 	for (int i = 0; i < tableSize; i++)
 	{
 		free(forest[i]);
@@ -221,12 +233,18 @@ void encodeString(char* string, char* fileName)
 
 void decodeString(char* fileName)
 {
-	int stringLength = 0;
 	FILE* file = fopen(fileName, "rb");
+
+	// Load the tree
 	Node* tree = _loadTree(file);
+
+	// Read the length of the encoded string
+	int stringLength = 0;
 	fscanf(file, "%d", &stringLength);
+
+	// Read the codes
 	Node* cursor = tree;
-	int code;
+	int code = 0;
 	int codeIndex = 0;
 	fread(&code, sizeof(int), 1, file);
 	while (true)
@@ -272,5 +290,7 @@ void decodeString(char* fileName)
 		}
 	}
 	fclose(file);
+
+	// Cleaning
 	free(tree);
 }
